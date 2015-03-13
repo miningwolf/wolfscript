@@ -59,7 +59,7 @@ public final class WSPluginLifecycle extends PluginLifecycleBase {
 
 		if (nodyn == null) {
 			RuntimeFactory factory = RuntimeFactory.init(
-			WolfScriptPluginLifecycle.class.getClassLoader(),
+			WSPluginLifecycle.class.getClassLoader(),
 			RuntimeFactory.RuntimeType.DYNJS);
 
 			String SCRIPT = "__native_require('bootstrap.js'); ";
