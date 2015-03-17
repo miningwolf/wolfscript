@@ -20,11 +20,26 @@ import net.canarymod.plugin.Plugin;
 import net.canarymod.plugin.PluginDescriptor;
 import net.canarymod.exceptions.PluginLoadFailedException;
 import io.nodyn.runtime.Program;
+import io.nodyn.Callback;
+import io.nodyn.CallbackResult;
+import net.canarymod.Canary;
 
 import org.dynjs.runtime.JSObject;
 import io.nodyn.Nodyn;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
+
+import java.util.List;
+
+import net.canarymod.chat.MessageReceiver;
+import net.canarymod.commandsys.TabCompleteDispatch;
+import net.canarymod.commandsys.DynamicCommandAnnotation;
+import com.miningwolf.wolfscript.commandsys.CommandListenerCallback;
+import com.miningwolf.wolfscript.commandsys.DynamicCanaryCommand;
+import net.canarymod.commandsys.CommandOwner;
+import net.canarymod.commandsys.CommandManager;
+import net.canarymod.commandsys.CommandDependencyException;
+import org.dynjs.runtime.JSFunction;
 
 /**
  * A WolfScript plugin (java side, common code for all WolfScript plugins)
@@ -37,15 +52,30 @@ public class WSPlugin extends Plugin {
 	private DynJS runtime;
 	private JSObject globalObject;
 
-	public WSPlugin(Nodyn nodyn, JSObject jsplugin) {
+	public WSPlugin(Nodyn nodyn, PluginDescriptor desc) throws Exception {
 		super();
 
-		this.jsplugin = jsplugin;
 		this.nodyn = nodyn;
 		this.globalObject = (JSObject) nodyn.getGlobalContext();
 
-		DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) globalObject.get(null, "dynjs");
-		this.runtime = dynjsBuiltin.getRuntime();
+		this.jsplugin = null;
+		String mainFile = desc.getPath() + "/" + desc.getCanaryInf().getString("main-class");
+		try {
+			DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) globalObject.get(null, "dynjs");
+			this.runtime = dynjsBuiltin.getRuntime();
+			JSFunction bootPlugin = (JSFunction) globalObject.get(null, "__boot_plugin");
+
+			Object obj = this.runtime.getDefaultExecutionContext().call(bootPlugin, this, mainFile);
+			if (obj instanceof JSObject) {
+				this.jsplugin = (JSObject) obj;
+			} else {
+				Canary.log.error("Wolfscript plugin does not seem to be an node module with exports.enable function() ");
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+			Canary.log.error(t.getMessage());
+			throw new PluginLoadFailedException("Failed to load plugin", t);
+		}
 	}
 
 	@Override
@@ -60,12 +90,25 @@ public class WSPlugin extends Plugin {
 	@Override
 	public boolean enable() {
 		try {
+			ClassLoader cl = WSPlugin.class.getClassLoader();
 			runtime.getDefaultExecutionContext().call((JSFunction) jsplugin.get(null, "enable"), this);
 			return true;
 		} catch (Exception e) {
-			this.getLogman().error(e.getMessage());
-			return false;
+			throw e;
+		//	this.getLogman().error(e.getMessage());
+		//	return false;
 		}
 	}
+
+	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
+		DynamicCommandAnnotation meta = new DynamicCommandAnnotation(aliases, permissions, description, toolTip, parent, helpLookup, searchTerms, min, max, tabCompleteMethod, version);
+		DynamicCanaryCommand cc = new com.miningwolf.wolfscript.commandsys.DynamicCanaryCommand(execute, meta, this, tabComplete, runtime.getDefaultExecutionContext());
+	
+		try {
+			Canary.commands().registerCommand(cc, this, false);
+		} catch (CommandDependencyException e) {
+			this.getLogman().error(e.getMessage());
+		};
+    }
 
 }

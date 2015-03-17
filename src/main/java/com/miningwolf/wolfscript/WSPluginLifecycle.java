@@ -37,11 +37,13 @@ import io.nodyn.runtime.RuntimeFactory;
 import io.nodyn.NoOpExitHandler;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
+import  org.dynjs.runtime.java.JavaPackage;
 
 import io.nodyn.runtime.Program;
 
 import java.io.File;
-
+import java.lang.Thread;
+import java.lang.ClassLoader;
 
 /* 
  * Lifecycle manager for a WolfScript plugin
@@ -56,11 +58,11 @@ public final class WSPluginLifecycle extends PluginLifecycleBase {
 
 	public WSPluginLifecycle(PluginDescriptor desc) throws Exception {
 		super(desc);
-
-		if (nodyn == null) {
+		
+    	if (nodyn == null) {
 			RuntimeFactory factory = RuntimeFactory.init(
-			WSPluginLifecycle.class.getClassLoader(),
-			RuntimeFactory.RuntimeType.DYNJS);
+			  WSPluginLifecycle.class.getClassLoader() 
+			, RuntimeFactory.RuntimeType.DYNJS);
 
 			String SCRIPT = "__native_require('bootstrap.js'); ";
 
@@ -72,7 +74,11 @@ public final class WSPluginLifecycle extends PluginLifecycleBase {
 			nodyn.setExitHandler(new NoOpExitHandler());
 
 			globalObject = (JSObject) nodyn.getGlobalContext();
+            DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) globalObject.get(null, "dynjs");
+		    GlobalContext globalContext = dynjsBuiltin.getRuntime().getGlobalContext();
+
 			globalObject.defineOwnProperty(null, "__log", PropertyDescriptor.newDataPropertyDescriptor(Canary.log, true, true, false), false);
+			globalObject.defineOwnProperty(null, "net", PropertyDescriptor.newDataPropertyDescriptor(new JavaPackage(globalContext, "net"), true, true, true), false);
 
 			try {
 				int exitCode = nodyn.run();
@@ -92,31 +98,31 @@ public final class WSPluginLifecycle extends PluginLifecycleBase {
 
 	@Override
 	protected void _load() throws PluginLoadFailedException {
-		JSObject jsplugin = null;
-		String mainFile = desc.getPath() + "/" + desc.getCanaryInf().getString("main-class");
-		try {
-			DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) globalObject.get(null, "dynjs");
-			DynJS runtime = dynjsBuiltin.getRuntime();
-			Object obj = runtime.getDefaultExecutionContext().call(bootPlugin, globalObject, mainFile);
-			if (obj instanceof JSObject) {
-				jsplugin = (JSObject) obj;
-			} else {
-				Canary.log.error("Wolfscript plugin does not seem to be an node module with exports.enable function() ");
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-			Canary.log.error(t.getMessage());
-			throw new PluginLoadFailedException("Failed to load plugin", t);
-		}
 
+		 ClassLoader cl = WSPluginLifecycle.class.getClassLoader();
+            try {
+                Class<?> cls = cl.loadClass("net.canarymod.commandsys.DynamicCommandAnnotation");
+                Canary.log.info("******** LOADED X");
+             } catch (ClassNotFoundException e) {
+                Canary.log.error(e.getMessage());
+            }
+
+	
 		//loader = new CanaryClassLoader(new File(desc.getPath()).toURI().toURL(), getClass().getClassLoader());
 		Plugin.threadLocalName.set(desc.getName());
-		Plugin p = new WSPlugin(nodyn, jsplugin);
-		p.setName(desc.getName());
-		p.setPriority(desc.getPriority());
-		desc.setPlugin(p);
-		p.getLogman().info("WolfScript plugin " + mainFile + " loaded.");
-	}
+		try {
+				Plugin p = new WSPlugin(nodyn, desc);
+				p.setName(desc.getName());
+				p.setPriority(desc.getPriority());
+				desc.setPlugin(p);
+				p.getLogman().info("WolfScript plugin " + p.getName() + " loaded.");
+
+			} catch (Exception t ){
+					t.printStackTrace();
+					Canary.log.error(t.getMessage());
+					throw new PluginLoadFailedException("Failed to load plugin", t);
+			}
+		}
 
 	@Override
 	protected void _unload() {
