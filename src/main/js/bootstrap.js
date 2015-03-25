@@ -21,13 +21,11 @@
 var util=require('util');
 
 console.log = function log() {
-    // Handle formatting and circular objects like in the original
     var msg = util.format.apply(this, arguments);
     __log.info(msg);
   };
 
 console.error = function log_error() {
-    // Handle formatting and circular objects like in the original
     var msg = util.format.apply(this, arguments);
     __log.error(msg);
   };

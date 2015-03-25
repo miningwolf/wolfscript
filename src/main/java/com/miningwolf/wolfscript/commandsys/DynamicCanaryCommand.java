@@ -7,7 +7,6 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.JSFunction;
 
 public class DynamicCanaryCommand extends CanaryCommand {
-
     private JSFunction executeMethod;
     private JSFunction tabCompleteMethod;
     private ExecutionContext executionContext;

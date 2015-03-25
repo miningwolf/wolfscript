@@ -100,6 +100,8 @@ public class WSPlugin extends Plugin {
 		}
 	}
 
+
+    // API Helpers
 	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
 		DynamicCommandAnnotation meta = new DynamicCommandAnnotation(aliases, permissions, description, toolTip, parent, helpLookup, searchTerms, min, max, tabCompleteMethod, version);
 		DynamicCanaryCommand cc = new com.miningwolf.wolfscript.commandsys.DynamicCanaryCommand(execute, meta, this, tabComplete, runtime.getDefaultExecutionContext());

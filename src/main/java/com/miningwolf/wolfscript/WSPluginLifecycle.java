@@ -107,7 +107,6 @@ public final class WSPluginLifecycle extends PluginLifecycleBase {
                 Canary.log.error(e.getMessage());
             }
 
-	
 		//loader = new CanaryClassLoader(new File(desc.getPath()).toURI().toURL(), getClass().getClassLoader());
 		Plugin.threadLocalName.set(desc.getName());
 		try {
