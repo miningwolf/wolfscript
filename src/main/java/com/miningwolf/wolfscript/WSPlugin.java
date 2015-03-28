@@ -16,13 +16,19 @@
 
 package com.miningwolf.wolfscript;
 
+import net.canarymod.Canary;
 import net.canarymod.plugin.Plugin;
 import net.canarymod.plugin.PluginDescriptor;
+import net.canarymod.plugin.PluginListener;
 import net.canarymod.exceptions.PluginLoadFailedException;
+import net.canarymod.hook.HookExecutor;
+import net.canarymod.hook.Hook;
+import net.canarymod.hook.HookExecutionException;
+import net.canarymod.hook.Dispatcher;
+import net.canarymod.plugin.Priority;
 import io.nodyn.runtime.Program;
 import io.nodyn.Callback;
 import io.nodyn.CallbackResult;
-import net.canarymod.Canary;
 
 import org.dynjs.runtime.JSObject;
 import io.nodyn.Nodyn;
@@ -40,6 +46,7 @@ import net.canarymod.commandsys.CommandOwner;
 import net.canarymod.commandsys.CommandManager;
 import net.canarymod.commandsys.CommandDependencyException;
 import org.dynjs.runtime.JSFunction;
+import java.lang.Class;
 
 /**
  * A WolfScript plugin (java side, common code for all WolfScript plugins)
@@ -51,12 +58,14 @@ public class WSPlugin extends Plugin {
 	private Nodyn nodyn;
 	private DynJS runtime;
 	private JSObject globalObject;
-
+    private HookExecutor hookExecutor;
+ 
 	public WSPlugin(Nodyn nodyn, PluginDescriptor desc) throws Exception {
 		super();
 
 		this.nodyn = nodyn;
 		this.globalObject = (JSObject) nodyn.getGlobalContext();
+		this.hookExecutor = Canary.hooks();
 
 		this.jsplugin = null;
 		String mainFile = desc.getPath() + "/" + desc.getCanaryInf().getString("main-class");
@@ -112,5 +121,64 @@ public class WSPlugin extends Plugin {
 			this.getLogman().error(e.getMessage());
 		};
     }
+
+    public void DynamicEvent(String eventName, JSFunction execute, String priority) {
+		Class t;
+
+		try
+		{
+    		t = this.getClass(eventName);
+   		} catch (Exception ex) { 
+   		 	throw new HookExecutionException(ex.getMessage(), ex); 
+   		};
+
+		hookExecutor.registerHook(
+   			new PluginListener() {},
+   			this,
+   			t,
+			new Dispatcher() {
+				@Override
+				public void execute(PluginListener listener, Hook hook) {
+					try {
+						runtime.getDefaultExecutionContext().call(execute, listener, hook);
+					} catch (Exception ex) {
+						throw new HookExecutionException(ex.getMessage(), ex);
+					}
+				}
+			},
+			Priority.valueOf(priority)
+			);
+    }
+
+    private Class getClass(String eventName) throws Exception {
+	       String[] elements = { "",
+	       "net.canarymod.hook.",
+	      "net.canarymod.hook.command.",
+	      "net.canarymod.hook.entity.",
+	      "net.canarymod.hook.player.",
+	      "net.canarymod.hook.system.",
+	      "net.canarymod.hook.world." 
+	    };
+
+	    for (String s: elements) {           
+		    System.out.println(s); 
+		    try {
+		    	Class t =  Class.forName(s + eventName);
+		    	return t;
+	   		} catch (Exception ex) { 
+	   		 	
+	   		};
+	   		try {
+		    	Class t =  Class.forName(s + eventName + "Hook");
+		    	return t;
+	   		} catch (Exception ex) { 
+	   		 	
+	   		};
+
+
+	 		
+		}
+		throw new Exception("Hook not found " + eventName); 
+	}
 
 }

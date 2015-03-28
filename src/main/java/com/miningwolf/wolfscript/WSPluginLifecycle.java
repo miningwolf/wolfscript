@@ -99,15 +99,6 @@ public final class WSPluginLifecycle extends PluginLifecycleBase {
 	@Override
 	protected void _load() throws PluginLoadFailedException {
 
-		 ClassLoader cl = WSPluginLifecycle.class.getClassLoader();
-            try {
-                Class<?> cls = cl.loadClass("net.canarymod.commandsys.DynamicCommandAnnotation");
-                Canary.log.info("******** LOADED X");
-             } catch (ClassNotFoundException e) {
-                Canary.log.error(e.getMessage());
-            }
-
-		//loader = new CanaryClassLoader(new File(desc.getPath()).toURI().toURL(), getClass().getClassLoader());
 		Plugin.threadLocalName.set(desc.getName());
 		try {
 				Plugin p = new WSPlugin(nodyn, desc);

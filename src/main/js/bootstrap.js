@@ -19,6 +19,7 @@
  */
  
 var util=require('util');
+var events = require("events");
 
 console.log = function log() {
     var msg = util.format.apply(this, arguments);
@@ -49,6 +50,11 @@ var API = function(javaplugin, jsplugin) {
    this._jsplugin = jsplugin;
   
    javaplugin.registerCommand = this.registerCommand.bind(javaplugin);
+   javaplugin.onEvent = this.onEvent.bind(javaplugin);
+
+   javaplugin.events = new events.EventEmitter();
+
+   javaplugin.events.on("newListener", function(event, handler) {javaplugin.onEvent(event, handler, "NORMAL")});
 
  };
 
@@ -129,4 +135,12 @@ API.prototype.registerCommand = function(metaContext) {
     function(owner, sender, args){tabComplete.call(owner,sender,args);}
     );
 }
+
+API.prototype.onEvent = function(name, handler, priority) {
+  this.DynamicEvent(
+    name, 
+    handler, 
+    priority);
+}
+
 
