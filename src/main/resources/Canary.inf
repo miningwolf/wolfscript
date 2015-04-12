@@ -1,2 +1,2 @@
 lang-name=wolfscript
-lifecycle-class=com.miningwolf.wolfscript.WSPluginLifecycle
+lifecycle-class=io.wolfscript.java.WSPluginLifecycle

@@ -44,6 +44,7 @@ global.__boot_plugin = function(mainFile){
        return false;
 };
 
+global.wolfserver = global.Packages.io.wolfscript.java;
 global.io.wolfscript = global.Packages.net.canarymod;
 
 var API = function(javaplugin, jsplugin) {
