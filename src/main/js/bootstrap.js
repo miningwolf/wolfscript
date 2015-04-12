@@ -1,4 +1,5 @@
 /*
+ * WolfScript
  * Copyright (c) 2015 Mining Wolf
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +16,7 @@
  */
 
 /*
- This file is executed directly from com.miningwolf.wolfscript.WSPluginLifecycle.java
+ This file is executed directly from io.wolfscript.java.WSPluginLifecycle.java
  */
  
 var util=require('util');
@@ -43,6 +44,8 @@ global.__boot_plugin = function(mainFile){
        return false;
 };
 
+global.io.wolfscript = global.Packages.net.canarymod;
+
 var API = function(javaplugin, jsplugin) {
   if (!(this instanceof API)) return new API(javaplugin, jsplugin);
  
@@ -51,9 +54,7 @@ var API = function(javaplugin, jsplugin) {
   
    javaplugin.registerCommand = this.registerCommand.bind(javaplugin);
    javaplugin.onEvent = this.onEvent.bind(javaplugin);
-
    javaplugin.events = new events.EventEmitter();
-
    javaplugin.events.on("newListener", function(event, handler) {javaplugin.onEvent(event, handler, "NORMAL")});
 
  };
@@ -62,47 +63,31 @@ var API = function(javaplugin, jsplugin) {
  * Register a new command dynamically on the minecraft server
  *
  * @method registerCommand
- *
  * @param String[] aliases    The command names
- *   
  * @param String[] permissions  A list of permissions to use this command.
  *                              If you specify more than one, only one of them is needed to execute the command
- * 
  * @param String description  What does this command do?
  *                            This will be displayed in a help context.
  *                            Note: This string will be pushed through the translator
  *                            If it finds a respective translation, it will output that instead
- *   
  * @param String toolTip    The tip to display when command parsing failed.
  *                            This may also be displayed when help for this command
  *                            was specifically requested
- *   
  * @param String parent   The parent command, for creating sub-command structures
- *   
  * @param String helpLookup   Explicitly define a name with which the command will be registered
  *                            at the help system. If this is empty (default), all aliases will be registered.
  *                            Otherwise only this name will be registered. <br>
  *                            Use it for registering sub-command helps to avoid name conflicts
- *   
  * @param String[] searchTerms   Specifies specific terms for looking up this command in help search
- *   
  * @param int min   Min amount of parameters   default 0
- * 
  * @param int max   The max amounts of parameters. -1 for infinite amount  default -1
- * 
  * @param String tabCompleteMethod
- *   
  * @param int version   The version of the command system to use.
  *                      Version 1 passes the command name with the arguments,
  *                      where as Version 2 adjusts the arguments to remove command name.
  *                      NOTE: Available versions are '1' and '2'.
  *                      Default 1
  */
-
-
-//  var meta = new Packages.net.canarymod.commandsys.DynamicCommandAnnotation(
-  //   new Array(),  new Array(), "desc", "tooltip", "parent", "helplookup",  new Array(), 0,0, "tabcomplete", "1");
- //console.log(util.inspect(meta));
 
 API.prototype.registerCommand = function(metaContext) {
   var aliases = (metaContext.aliases === undefined) ? [ "js" , "jsp" ] : metaContext.aliases;
@@ -131,7 +116,6 @@ API.prototype.registerCommand = function(metaContext) {
     "", 
     version, 
     execute,
- /*   function(owner, sender, args){execute.call(owner,sender,args);}, */
     function(owner, sender, args){tabComplete.call(owner,sender,args);}
     );
 }
@@ -142,5 +126,3 @@ API.prototype.onEvent = function(name, handler, priority) {
     handler, 
     priority);
 }
-
-

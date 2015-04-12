@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 
-
 <!--
  * Project Build File for WolfScript Language Plugin
  *
@@ -24,13 +23,14 @@
 <project name="wolfscript" default="package" basedir=".">
   <property file="build.properties"/>
   <description>Builds the wolfscript.jar file - a language plugin for canarymod</description>
-  <property name="src.java" location="src/main/java/com/miningwolf/"/>
-  <property name="lib.nodyn" location="lib/nodyn-standalone.jar"/>
-  <property name="lib.canary" location="target/lib/canarymod.jar"/>
+  <property name="src.java" location="src/main/java/io/wolfscript/"/>
+  <property name="lib.nodyn" location="thirdparty/nodyn-standalone.jar"/>
+  <property name="lib.canary" location="thirdparty/build/canarymod.jar"/>
   <property name="minecraft.dir" location="../minecraft" />
 
   <property name="build" location="build/classes"/>
   <property name="dist" location="target/" />
+  <property name="thirdparty" location="thirdparty/" />
   <property name="http.agent" value="'domabo-build'" />
   <property name="ant.build.javac.source" value="1.8"/>
   <property name="ant.build.javac.target" value="1.8"/>
@@ -51,12 +51,13 @@
   <target name="get-canary" depends="init" description="Downloads canarymod jar" unless="canary.present">
     <get src="https://ci.visualillusionsent.net/job/CanaryMod/lastStableBuild/artifact/*zip*/archive.zip"
 	 maxtime="60"
-	 dest="target/canarymod.zip"
+	 dest="${thidparty}build/canarymod.zip"
 	 verbose="true"/>
-    <unzip src="target/canarymod.zip"
-	   dest="target/lib">
+    <unzip src="${thidparty}build/canarymod.zip"
+	   dest="${thidparty}build">
       <mapper type="glob" from="*.jar" to="canarymod.jar"/>
     </unzip>
+    <delete file="${thidparty}build/canarymod.zip"/>
   </target>
 
 
@@ -88,9 +89,9 @@
   
    <mkdir dir="${dist}/${DSTAMP}" />
    <jar jarfile="${dist}/${DSTAMP}/wolfscript.jar" basedir="${build}" >
-         <zipgroupfileset file="lib/nodyn-standalone.jar" />  
+         <zipgroupfileset file="${lib.nodyn}" />  
          <manifest>
-                <attribute name="Main-Class" value="com.miningwolf.wolfscript.WolfScriptPluginLifecycle"/>
+                <attribute name="Main-Class" value="io.wolfscript.java.WolfScriptPluginLifecycle"/>
                 <attribute name="Class-Path" value="pluginlangs/wolfscript.jar"/>
             </manifest>
     </jar>
@@ -104,5 +105,6 @@
 
   <target name="clean" description="clean up" >
     <delete dir="${dist}"/>
+    <delete dir="${build}"/>
   </target>
 </project>

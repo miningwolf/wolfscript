@@ -145,3 +145,6 @@ logs/
 plugins/
 viutilslogs/
 worlds/
+
+# CanaryMod Build Temps
+thirdparty/build
