@@ -51,13 +51,13 @@
   <target name="get-canary" depends="init" description="Downloads canarymod jar" unless="canary.present">
     <get src="https://ci.visualillusionsent.net/job/CanaryMod/lastStableBuild/artifact/*zip*/archive.zip"
 	 maxtime="60"
-	 dest="${thidparty}build/canarymod.zip"
+	 dest="${thirdparty}build/canarymod.zip"
 	 verbose="true"/>
-    <unzip src="${thidparty}build/canarymod.zip"
-	   dest="${thidparty}build">
+    <unzip src="${thirdparty}build/canarymod.zip"
+	   dest="${thirdparty}build">
       <mapper type="glob" from="*.jar" to="canarymod.jar"/>
     </unzip>
-    <delete file="${thidparty}build/canarymod.zip"/>
+    <delete file="${thirdparty}build/canarymod.zip"/>
   </target>
 
 
