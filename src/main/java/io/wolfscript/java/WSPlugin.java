@@ -100,16 +100,12 @@ public class WSPlugin extends Plugin {
 	@Override
 	public boolean enable() {
 		try {
-			ClassLoader cl = WSPlugin.class.getClassLoader();
 			runtime.getDefaultExecutionContext().call((JSFunction) jsplugin.get(null, "enable"), this);
 			return true;
 		} catch (Exception e) {
 			throw e;
-		//	this.getLogman().error(e.getMessage());
-		//	return false;
 		}
 	}
-
 
     // API Helpers
 	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
