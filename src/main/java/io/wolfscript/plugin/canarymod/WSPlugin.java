@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.wolfscript.java;
+package io.wolfscript.plugin.canarymod;
 
 import net.canarymod.Canary;
 import net.canarymod.plugin.Plugin;
@@ -35,19 +35,19 @@ import org.dynjs.runtime.JSObject;
 import io.nodyn.Nodyn;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
-
-import java.util.List;
+import org.dynjs.runtime.JSFunction;
 
 import net.canarymod.chat.MessageReceiver;
 import net.canarymod.commandsys.TabCompleteDispatch;
 import net.canarymod.commandsys.DynamicCommandAnnotation;
-// import io.wolfscript.java.commandsys.CommandListenerCallback;
-import io.wolfscript.java.commandsys.DynamicCanaryCommand;
 import net.canarymod.commandsys.CommandOwner;
 import net.canarymod.commandsys.CommandManager;
 import net.canarymod.commandsys.CommandDependencyException;
-import org.dynjs.runtime.JSFunction;
+
+import java.util.List;
 import java.lang.Class;
+
+import io.wolfscript.plugin.canarymod.commandsys.DynamicCommand;
 
 /**
  * A WolfScript plugin (java side, common code for all WolfScript plugins)
@@ -110,7 +110,7 @@ public class WSPlugin extends Plugin {
     // API Helpers
 	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
 		DynamicCommandAnnotation meta = new DynamicCommandAnnotation(aliases, permissions, description, toolTip, parent, helpLookup, searchTerms, min, max, tabCompleteMethod, version);
-		DynamicCanaryCommand cc = new DynamicCanaryCommand(execute, meta, this, tabComplete, runtime.getDefaultExecutionContext());
+		DynamicCommand cc = new DynamicCommand(execute, meta, this, tabComplete, runtime.getDefaultExecutionContext());
 	
 		try {
 			Canary.commands().registerCommand(cc, this, false);

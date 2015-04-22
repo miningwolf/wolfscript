@@ -1,0 +1,3 @@
+name: WolfScript_Language_Plugin
+main: io.wolfscript.plugin.spigot.WolfScriptPlugin
+version: 0.1

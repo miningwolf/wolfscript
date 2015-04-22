@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.wolfscript.java.commandsys;
+package io.wolfscript.plugin.canarymod.commandsys;
 
 import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
@@ -24,12 +24,12 @@ import java.util.List;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.JSFunction;
 
-public class DynamicCanaryCommand extends CanaryCommand {
+public class DynamicCommand extends CanaryCommand {
     private JSFunction executeMethod;
     private JSFunction tabCompleteMethod;
     private ExecutionContext executionContext;
  
-    public DynamicCanaryCommand(JSFunction executeMethod, Command meta, CommandOwner owner, JSFunction tabCompleteMethod, ExecutionContext executionContext) {
+    public DynamicCommand(JSFunction executeMethod, Command meta, CommandOwner owner, JSFunction tabCompleteMethod, ExecutionContext executionContext) {
         super(meta, owner, Translator.getInstance());
         this.executeMethod = executeMethod;
         this.tabCompleteMethod = tabCompleteMethod;

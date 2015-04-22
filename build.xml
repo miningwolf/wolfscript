@@ -26,7 +26,9 @@
   <property name="src.java" location="src/main/java/io/wolfscript/"/>
   <property name="lib.nodyn" location="thirdparty/nodyn-standalone.jar"/>
   <property name="lib.canary" location="thirdparty/build/canarymod.jar"/>
-  <property name="minecraft.dir" location="../minecraft" />
+  <property name="lib.spigot" location="thirdparty/build/spigot-api.jar"/>
+  <property name="minecraft.canary.dir" location="../minecraft" />
+  <property name="minecraft.spigot.dir" location="../minecraft-spigot" />
 
   <property name="build" location="build/classes"/>
   <property name="dist" location="target/" />
@@ -46,25 +48,32 @@
     <mkdir dir="${dist}"/>
 
     <available file="${lib.canary}" property="canary.present"/>
+    <available file="${lib.spigot}" property="spigot.present"/>
   </target>
    
   <target name="get-canary" depends="init" description="Downloads canarymod jar" unless="canary.present">
     <get src="https://ci.visualillusionsent.net/job/CanaryMod/lastStableBuild/artifact/*zip*/archive.zip"
 	 maxtime="60"
-	 dest="${thirdparty}/canarymod.zip"
+	 dest="${thirdparty}/build/canarymod.zip"
 	 verbose="true"/>
-    <unzip src="${thirdparty}/canarymod.zip"
+    <unzip src="${thirdparty}/build/canarymod.zip"
 	   dest="${thirdparty}/build">
       <mapper type="glob" from="*.jar" to="canarymod.jar"/>
     </unzip>
-    <delete file="${thirdparty}/canarymod.zip"/>
+    <delete file="${thirdparty}/build/canarymod.zip"/>
   </target>
-
+  
+  <target name="get-spigot" depends="init" description="Downloads spigot-api jar" unless="spigot.present">
+    <get src="http://tcpr.ca/download/spigot/spigot-api-1.8.3-R0.1-SNAPSHOT-latest.jar"
+	 maxtime="60"
+	 dest="${thirdparty}/build/spigot-api.jar"
+	 verbose="true"/>
+  </target>
 
   <target name="test" depends="package" description="Perform unit tests">
   </target>
 
-  <target name="compile-java" depends="init,get-canary" description="compile java source">
+  <target name="compile-java" depends="init,get-canary,get-spigot" description="compile java source">
     <javac includeantruntime="false" 
            destdir="${build}" 
            debug="true">
@@ -72,6 +81,7 @@
       <classpath>
         <pathelement path="${lib.nodyn}" />
         <pathelement path="${lib.canary}" />
+        <pathelement path="${lib.spigot}" />
       </classpath>
     </javac>
   </target>
@@ -96,11 +106,18 @@
             </manifest>
     </jar>
     <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${dist}/wolfscript.jar"/>
-        <delete>
-      <fileset dir="${minecraft.dir}/pluginlangs/" includes="wolfscript*.*"/>
+      
+    <delete>
+      <fileset dir="${minecraft.canary.dir}/pluginlangs/" includes="wolfscript*.*"/>
+    </delete>
+    <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.canary.dir}/pluginlangs/wolfscript.jar"/>
+      
+    <delete>
+      <fileset dir="${minecraft.spigot.dir}/plugins/" includes="wolfscript*.*"/>
     </delete>
   
-    <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.dir}/pluginlangs/wolfscript.jar"/>
+    <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.spigot.dir}/plugins/wolfscript.jar"/>
+
   </target>
 
   <target name="clean" description="clean up" >

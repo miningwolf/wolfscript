@@ -62,12 +62,17 @@ Build with
 
     ant
 
-Run with
+Run with (CanaryMod)
 
     cd ../minecraft  #or wherever your canarymod directory is#
     java -cp "canarymod.jar":"pluginlangs/wolfscript.jar" net.canarymod.Main
+    
+Run with (Spigot/CraftBukkit)
+  
+    cd ../minecraft-spigot  #or wherever your spigot directory is#
+    java -jar spigot.jar
 
-Please note:  it is important not to run CanaryMod with the usual -jar command, but instead using the classpath (cp) switch indicated.
+Please note:  it is no longer important to run CanaryMod with the usual -jar command, but instead using the classpath (cp) switch indicated.
 
 ### License
 

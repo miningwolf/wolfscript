@@ -16,7 +16,7 @@
  */
 
 /*
- This file is executed directly from io.wolfscript.java.WSPluginLifecycle.java
+ This file is executed directly from io.wolfscript.plugin.[host].WSPluginLoader.java
  */
  
 var util=require('util');
@@ -44,8 +44,8 @@ global.__boot_plugin = function(mainFile){
        return false;
 };
 
-global.wolfserver = global.Packages.io.wolfscript.java;
-global.io.wolfscript = global.Packages.net.canarymod;
+// global.wolfserver = global.Packages.io.wolfscript.java1;
+// global.io.wolfscript = global.Packages.net.canarymod;
 
 var API = function(javaplugin, jsplugin) {
   if (!(this instanceof API)) return new API(javaplugin, jsplugin);
@@ -127,3 +127,6 @@ API.prototype.onEvent = function(name, handler, priority) {
     handler, 
     priority);
 }
+
+console.log("WolfScript successfully bootstrapped");
+console.log(process.cwd());

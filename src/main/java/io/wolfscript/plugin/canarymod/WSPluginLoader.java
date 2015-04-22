@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.wolfscript.java;
+package io.wolfscript.plugin.canarymod;
 
 import net.canarymod.CanaryClassLoader;
 import net.canarymod.exceptions.PluginLoadFailedException;
@@ -24,14 +24,6 @@ import net.canarymod.plugin.PluginDescriptor;
 import net.canarymod.plugin.lifecycle.PluginLifecycleBase;
 import net.canarymod.Canary;
 
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptEngine;
-import javax.script.Invocable;
-import javax.script.ScriptException;
-
-import io.nodyn.Callback;
-import io.nodyn.CallbackResult;
-import io.nodyn.ExitHandler;
 import io.nodyn.Nodyn;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
@@ -40,29 +32,27 @@ import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
 import org.dynjs.runtime.java.JavaPackage;
 
-import io.nodyn.runtime.Program;
-
 import java.io.File;
 import java.lang.Thread;
 import java.lang.ClassLoader;
 
 /* 
- * Lifecycle manager for a WolfScript plugin
+ * Lifecycle manager for a WolfScript plugin that runs under CanaryMod
  *
  * @author miningwolf
  */
-public final class WSPluginLifecycle extends PluginLifecycleBase {
+public final class WSPluginLoader extends PluginLifecycleBase {
 	private CanaryClassLoader loader;
 	private static Nodyn nodyn;
 	private static JSFunction bootPlugin;
 	private static JSObject globalObject;
 
-	public WSPluginLifecycle(PluginDescriptor desc) throws Exception {
+	public WSPluginLoader(PluginDescriptor desc) throws Exception {
 		super(desc);
 		
     	if (nodyn == null) {
 			RuntimeFactory factory = RuntimeFactory.init(
-			  WSPluginLifecycle.class.getClassLoader() 
+			  WSPluginLoader.class.getClassLoader() 
 			, RuntimeFactory.RuntimeType.DYNJS);
 
 			String SCRIPT = "__native_require('bootstrap.js'); ";
