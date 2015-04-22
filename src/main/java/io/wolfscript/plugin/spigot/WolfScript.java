@@ -20,24 +20,24 @@ package io.wolfscript.plugin.spigot;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.InvalidPluginException;
 
-import io.wolfscript.engine.WolfScriptClassPathFixer;
-import io.wolfscript.plugin.WolfScriptPluginManager;
+import io.wolfscript.engine.WSClassPathFixer;
+import io.wolfscript.plugin.WSPluginManager;
 
 /* 
  * Lifecycle manager for a WolfScript plugin that runs under Bukkit / CraftBukkit / Spigot
  *
  * @author miningwolf
  */
-public class WolfScriptPlugin extends JavaPlugin {
+public class WolfScript extends JavaPlugin {
     
-    private WolfScriptPluginManager wsPluginManager;
+    private WSPluginManager wsPluginManager;
    
-    public WolfScriptPlugin() {
+    public WolfScript() {
          super();
          
-         wsPluginManager = new WolfScriptPluginManager();
+         wsPluginManager = new WSPluginManager();
          try {
-             WolfScriptClassPathFixer.fix();
+             WSClassPathFixer.fix();
              wsPluginManager.onLoad(getLogger());
          } catch (Exception t ){
 					t.printStackTrace();

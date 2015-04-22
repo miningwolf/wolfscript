@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
  *
  * @author miningwolf
  */
-public class WolfScriptClassPathFixer {
+public class WSClassPathFixer {
 	
 	protected static boolean fixed = false;
 	
@@ -34,7 +34,7 @@ public class WolfScriptClassPathFixer {
  	 	if (fixed == false) {
 	 	    
 	 	    // Add Current JAR to System Class Loader so that Nodyn Vertx ServiceLoader works
-            URL url = WolfScriptClassPathFixer.class.getProtectionDomain().getCodeSource().getLocation();
+            URL url = WSClassPathFixer.class.getProtectionDomain().getCodeSource().getLocation();
             Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class}); 
             method.setAccessible(true); 
             method.invoke(ClassLoader.getSystemClassLoader(), new Object[]{url}); 

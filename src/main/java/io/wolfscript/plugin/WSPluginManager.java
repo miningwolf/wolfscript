@@ -33,7 +33,7 @@ import java.util.ArrayList;
  *
  * @author miningwolf
  */
-public class WolfScriptPluginManager {
+public class WSPluginManager {
 	
 	protected  WSEngineNodyn wsEngine;
 	protected Logger logger;
