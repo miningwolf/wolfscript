@@ -32,7 +32,6 @@ public class WSClassPathFixer {
  	public static void fix() throws Exception {
  	 
  	 	if (fixed == false) {
-	 	    
 	 	    // Add Current JAR to System Class Loader so that Nodyn Vertx ServiceLoader works
             URL url = WSClassPathFixer.class.getProtectionDomain().getCodeSource().getLocation();
             Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class}); 

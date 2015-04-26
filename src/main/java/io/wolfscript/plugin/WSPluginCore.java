@@ -32,14 +32,19 @@ import org.dynjs.runtime.JSObject;
  *
  * @author miningwolf
  */
-public class WSPlugin {
+public class WSPluginCore {
 	private JSObject jsplugin;
-	private WSEngineNodyn engine;
+	private static WSEngineNodyn engine = null;
 	private Logger logger;
 
-	public WSPlugin(WSEngineNodyn engine, String mainFile, Logger logger) throws Exception {
+	public WSPluginCore(String mainFile, Logger logger) throws Exception {
 		super();
-
+	
+		if  (engine == null) {
+			engine = new WSEngineNodyn(logger);
+            engine.loadRuntime();
+		}
+ 
 		this.engine = engine;
 		this.logger = logger;
 	//	this.hookExecutor = Canary.hooks();
@@ -54,7 +59,7 @@ public class WSPlugin {
 			if (obj instanceof JSObject) {
 				this.jsplugin = (JSObject) obj;
 			} else {
-				this.getLogger().severe("Wolfscript plugin does not seem to be an node module with exports.enable function() ");
+				this.getLogger().severe("WolfScript plugin does not seem to be a node module with exports.enable function() ");
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -81,9 +86,12 @@ public class WSPlugin {
 
     // API Helpers
 	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
-    }
+    
+	}
 
     public void DynamicEvent(String eventName, JSFunction execute, String priority) {
+    
+    	
     }
     
    	public final Logger getLogger() {

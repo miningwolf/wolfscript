@@ -127,6 +127,3 @@ API.prototype.onEvent = function(name, handler, priority) {
     handler, 
     priority);
 }
-
-console.log("WolfScript successfully bootstrapped");
-console.log(process.cwd());

@@ -135,7 +135,7 @@ Temporary Items
 Session.vim
 .netrwhist
 
-# CanaryMod/Minecraft directories
+# Minecraft directories
 config/
 crash-reports/
 databases/
@@ -145,6 +145,7 @@ logs/
 plugins/
 viutilslogs/
 worlds/
+node_modules/
 
-# CanaryMod Build Temps
-thirdparty/build
+# Downloaded lib
+lib/

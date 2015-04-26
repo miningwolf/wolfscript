@@ -24,6 +24,7 @@ import java.util.List;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.JSFunction;
 
+@SuppressWarnings("unchecked")
 public class DynamicCommand extends CanaryCommand {
     private JSFunction executeMethod;
     private JSFunction tabCompleteMethod;

@@ -52,8 +52,6 @@ public class WSEngineNodyn  {
 
    	public void loadRuntime() throws IOException {
     	if (nodyn == null) {
-    		getLogger().info("Loading Nodyn");
-          
     		RuntimeFactory factory = RuntimeFactory.init(
 			 this.getClass().getClassLoader()
 			, RuntimeFactory.RuntimeType.DYNJS);
@@ -64,11 +62,8 @@ public class WSEngineNodyn  {
 				"-e", SCRIPT
 			});
 	
-			getLogger().info("START1");
 			nodyn = factory.newRuntime(config);
-			getLogger().info("START2");
 			nodyn.setExitHandler(new NoOpExitHandler());
-			getLogger().info("START3");
 			
 			globalObject = (JSObject) nodyn.getGlobalContext();
             DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) globalObject.get(null, "dynjs");

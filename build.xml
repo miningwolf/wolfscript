@@ -20,68 +20,115 @@
  *
  * Build with $ ant
 -->
-<project name="wolfscript" default="package" basedir=".">
-  <property file="build.properties"/>
-  <description>Builds the wolfscript.jar file - a language plugin for canarymod</description>
-  <property name="src.java" location="src/main/java/io/wolfscript/"/>
-  <property name="lib.nodyn" location="thirdparty/nodyn-standalone.jar"/>
-  <property name="lib.canary" location="thirdparty/build/canarymod.jar"/>
-  <property name="lib.spigot" location="thirdparty/build/spigot-api.jar"/>
-  <property name="minecraft.canary.dir" location="../minecraft" />
-  <property name="minecraft.spigot.dir" location="../minecraft-spigot" />
-
-  <property name="build" location="build/classes"/>
-  <property name="dist" location="target/" />
-  <property name="thirdparty" location="thirdparty/" />
-  <property name="http.agent" value="'domabo-build'" />
-  <property name="ant.build.javac.source" value="1.8"/>
-  <property name="ant.build.javac.target" value="1.8"/>
-
-  <target name="init">
-    <property file="build.local.properties"/>
-    <tstamp>
-      <format property="DSTAMP"
-              pattern="yyyy-MM-dd"
-              locale="en,UK"/>
-    </tstamp>
-    <mkdir dir="${build}"/>
-    <mkdir dir="${dist}"/>
-
-    <available file="${lib.canary}" property="canary.present"/>
-    <available file="${lib.spigot}" property="spigot.present"/>
-  </target>
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="wolfscript" default="package"  basedir=".">
+    <property file="build.properties"/>
+    <description>Builds the wolfscript.jar file - a language plugin for minecraft servers</description>
+    <property name="src.dir" value="src"/>
+    <property name="src.java" location="${src.dir}/main/java/io/wolfscript/"/>
+    <property name="build" value="build"/>
+    <property name="classes.dir" location="${build}/classes"/>
+    <property name="dist" location="target/" />
+    <property name="lib.dir" value="lib" />
+    <property name="thirdparty.dir" value="thirdparty" />
+    <property name="lib.nodyn" location="${thirdparty.dir}/nodyn-standalone.jar"/>
+    <property name="lib.canary" location="${lib.dir}/canarymod.jar"/>
+    <property name="lib.spigot" location="${lib.dir}/spigot.jar"/>
+    <property name="lib.json" location="${thirdparty.dir}/json-simple.jar"/>
    
+    <property name="minecraft.canary.dir" location="../minecraft" />
+    <property name="minecraft.spigot.dir" location="../minecraft-spigot" />
+    <property name="skipivy" value="true"/>
+   
+    <property name="http.agent" value="'domabo-build'" />
+    <property name="ant.build.javac.source" value="1.8"/>
+    <property name="ant.build.javac.target" value="1.8"/>
+    
+    <property name="ivy.install.version" value="2.1.0-rc2" />
+    <condition property="ivy.home" value="${env.IVY_HOME}">
+      <isset property="env.IVY_HOME" />
+    </condition>
+    
+    <property name="ivy.home" value="${user.home}/.ant" />
+    <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+    
+    <target name="init">
+        <property file="build.local.properties"/>
+        <tstamp>
+        <format property="DSTAMP"
+                  pattern="yyyy-MM-dd"
+                  locale="en,UK"/>
+        </tstamp>
+        
+        <mkdir dir="${build}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist}"/>
+        <mkdir dir="${lib.dir}"/>
+        <available file="${lib.canary}" property="canary.present"/>
+        <available file="${lib.spigot}" property="spigot.present"/>
+        <available file="${lib.json}" property="jsonparser.present"/>
+        <available file="${ivy.jar.file}" property="ivy.present"/>
+    </target>
+    
   <target name="get-canary" depends="init" description="Downloads canarymod jar" unless="canary.present">
-    <get src="https://ci.visualillusionsent.net/job/CanaryMod/lastStableBuild/artifact/*zip*/archive.zip"
-	 maxtime="60"
-	 dest="${thirdparty}/build/canarymod.zip"
-	 verbose="true"/>
-    <unzip src="${thirdparty}/build/canarymod.zip"
-	   dest="${thirdparty}/build">
-      <mapper type="glob" from="*.jar" to="canarymod.jar"/>
-    </unzip>
-    <delete file="${thirdparty}/build/canarymod.zip"/>
+      <get src="https://ci.visualillusionsent.net/job/CanaryMod/lastStableBuild/artifact/*zip*/archive.zip"
+      	 maxtime="60"
+      	 dest="${lib.dir}/canarymod.zip"
+      	 verbose="true"/>
+      <unzip src="${lib.dir}/canarymod.zip"
+  	     dest="${lib.dir}">
+        <mapper type="glob" from="*.jar" to="canarymod.jar"/>
+      </unzip>
+      <delete file="${lib.dir}/canarymod.zip"/>
   </target>
   
   <target name="get-spigot" depends="init" description="Downloads spigot-api jar" unless="spigot.present">
-    <get src="http://tcpr.ca/download/spigot/spigot-api-1.8.3-R0.1-SNAPSHOT-latest.jar"
+    <get src="http://tcpr.ca/download/spigot/spigot-1.8.3-R0.1-SNAPSHOT-latest.jar"
 	 maxtime="60"
-	 dest="${thirdparty}/build/spigot-api.jar"
+	 dest="${lib.spigot}"
 	 verbose="true"/>
   </target>
-
-  <target name="test" depends="package" description="Perform unit tests">
+  
+  <target name="get-json" depends="init" description="Downloads json parser jar" unless="jsonparser.present">
+    <get src="http://json-simple.googlecode.com/files/json-simple-1.1.1.jar"
+	 maxtime="60"
+	 dest="${lib.json}"
+	 verbose="true"/>
+  </target>
+  
+  <target name="get-ivy" unless="ivy.present">
+      <mkdir dir="${ivy.jar.dir}"/>
+      <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" 
+           dest="${ivy.jar.file}" usetimestamp="true"/>
   </target>
 
-  <target name="compile-java" depends="init,get-canary,get-spigot" description="compile java source">
+  <target name="init-ivy" depends="get-ivy">
+       <path id="ivy.lib.path">
+          <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+      </path>
+      <taskdef resource="org/apache/ivy/ant/antlib.xml"
+               uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+  </target>
+    
+    <target name="resolve" depends="init-ivy"  unless="skipivy">
+        <ivy:retrieve />
+    </target>
+ 
+  <target name="compile-java" depends="init,resolve,get-canary,get-spigot,get-json" description="compile java source">
     <javac includeantruntime="false" 
            destdir="${build}" 
-           debug="true">
+            debug="true">
       <src path="${src.java}"/>
       <classpath>
         <pathelement path="${lib.nodyn}" />
         <pathelement path="${lib.canary}" />
         <pathelement path="${lib.spigot}" />
+        <pathelement path="${lib.json}" />
       </classpath>
     </javac>
   </target>
@@ -93,35 +140,31 @@
   </target>
 
   <target name="package" depends="compile-java, copy-js" description="generate the distribution" >
-       <copy todir="${build}">
-      <fileset dir="src/main/resources"/>
-    </copy>
-  
-   <mkdir dir="${dist}/${DSTAMP}" />
-   <jar jarfile="${dist}/${DSTAMP}/wolfscript.jar" basedir="${build}" >
-         <zipgroupfileset file="${lib.nodyn}" />  
-         <manifest>
-                <attribute name="Main-Class" value="io.wolfscript.java.WolfScriptPluginLifecycle"/>
-                <attribute name="Class-Path" value="pluginlangs/wolfscript.jar"/>
-            </manifest>
-    </jar>
-    <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${dist}/wolfscript.jar"/>
-      
-    <delete>
-      <fileset dir="${minecraft.canary.dir}/pluginlangs/" includes="wolfscript*.*"/>
-    </delete>
-    <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.canary.dir}/pluginlangs/wolfscript.jar"/>
-      
-    <delete>
-      <fileset dir="${minecraft.spigot.dir}/plugins/" includes="wolfscript*.*"/>
-    </delete>
-  
-    <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.spigot.dir}/plugins/wolfscript.jar"/>
-
+      <copy todir="${build}">
+        <fileset dir="src/main/resources"/>
+      </copy>
+    
+     <mkdir dir="${dist}/${DSTAMP}" />
+     <jar jarfile="${dist}/${DSTAMP}/wolfscript.jar" basedir="${build}" >
+           <zipgroupfileset file="${lib.nodyn}" />  
+           <zipgroupfileset file="${lib.json}" />  
+           <manifest>
+                  <attribute name="Main-Class" value="io.wolfscript.plugin.spigot.WolfScript"/>
+                  <attribute name="Class-Path" value="pluginlangs/wolfscript.jar"/>
+              </manifest>
+      </jar>
+      <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${dist}/wolfscript.jar"/>
+        
+      <delete>
+        <fileset dir="${minecraft.canary.dir}/pluginlangs/" includes="wolfscript*.*"/>
+      </delete>
+      <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.canary.dir}/pluginlangs/wolfscript.jar"/>
+        
+      <delete>
+        <fileset dir="${minecraft.spigot.dir}/plugins/" includes="wolfscript*.*"/>
+      </delete>
+    
+      <copy file="${dist}/${DSTAMP}/wolfscript.jar" tofile="${minecraft.spigot.dir}/plugins/wolfscript.jar"/>
   </target>
 
-  <target name="clean" description="clean up" >
-    <delete dir="${dist}"/>
-    <delete dir="${build}"/>
-  </target>
 </project>
