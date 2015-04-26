@@ -32,9 +32,10 @@
     <property name="thirdparty.dir" value="thirdparty" />
     <property name="lib.nodyn" location="${thirdparty.dir}/nodyn-standalone.jar"/>
     <property name="lib.canary" location="${lib.dir}/canarymod.jar"/>
-    <property name="lib.spigot" location="${lib.dir}/spigot.jar"/>
+    <property name="lib.spigot" location="${lib.dir}/spigot-api.jar"/>
     <property name="lib.json" location="${thirdparty.dir}/json-simple.jar"/>
-   
+    <property name="lib.ebean" location="${lib.dir}/ebeanorm.jar"/>
+    
     <property name="minecraft.canary.dir" location="../minecraft" />
     <property name="minecraft.spigot.dir" location="../minecraft-spigot" />
     <property name="skipivy" value="true"/>
@@ -72,6 +73,7 @@
         <available file="${lib.canary}" property="canary.present"/>
         <available file="${lib.spigot}" property="spigot.present"/>
         <available file="${lib.json}" property="jsonparser.present"/>
+          <available file="${lib.ebean}" property="ebean.present"/>
         <available file="${ivy.jar.file}" property="ivy.present"/>
     </target>
     
@@ -88,7 +90,7 @@
   </target>
   
   <target name="get-spigot" depends="init" description="Downloads spigot-api jar" unless="spigot.present">
-    <get src="http://tcpr.ca/download/spigot/spigot-1.8.3-R0.1-SNAPSHOT-latest.jar"
+    <get src="http://tcpr.ca/download/spigot/spigot-api-1.8.3-R0.1-SNAPSHOT-latest.jar"
 	 maxtime="60"
 	 dest="${lib.spigot}"
 	 verbose="true"/>
@@ -98,6 +100,13 @@
     <get src="http://json-simple.googlecode.com/files/json-simple-1.1.1.jar"
 	 maxtime="60"
 	 dest="${lib.json}"
+	 verbose="true"/>
+  </target>
+  
+  <target name="get-ebean" depends="init" unless="ebean.present">
+    <get src=" http://central.maven.org/maven2/org/avaje/ebeanorm/avaje-ebeanorm/4.5.5/avaje-ebeanorm-4.5.5.jar"
+	 maxtime="60"
+	 dest="${lib.ebean}"
 	 verbose="true"/>
   </target>
   
@@ -119,7 +128,7 @@
         <ivy:retrieve />
     </target>
  
-  <target name="compile-java" depends="init,resolve,get-canary,get-spigot,get-json" description="compile java source">
+  <target name="compile-java" depends="init,resolve,get-canary,get-spigot,get-json,get-ebean" description="compile java source">
     <javac includeantruntime="false" 
            destdir="${build}" 
             debug="true">
@@ -129,6 +138,7 @@
         <pathelement path="${lib.canary}" />
         <pathelement path="${lib.spigot}" />
         <pathelement path="${lib.json}" />
+        <pathelement path="${lib.ebean}" />
       </classpath>
     </javac>
   </target>
