@@ -34,7 +34,7 @@
     <property name="lib.canary" location="${lib.dir}/canarymod.jar"/>
     <property name="lib.spigot" location="${lib.dir}/spigot-api.jar"/>
     <property name="lib.json" location="${thirdparty.dir}/json-simple.jar"/>
-    <property name="lib.ebean" location="${lib.dir}/ebeanorm.jar"/>
+    <property name="lib.ebean" location="${lib.dir}/ebean.jar"/>
     
     <property name="minecraft.canary.dir" location="../minecraft" />
     <property name="minecraft.spigot.dir" location="../minecraft-spigot" />
@@ -104,7 +104,7 @@
   </target>
   
   <target name="get-ebean" depends="init" unless="ebean.present">
-    <get src=" http://central.maven.org/maven2/org/avaje/ebeanorm/avaje-ebeanorm/4.5.5/avaje-ebeanorm-4.5.5.jar"
+    <get src=" http://central.maven.org/maven2/org/avaje/ebean/2.8.1/ebean-2.8.1.jar"
 	 maxtime="60"
 	 dest="${lib.ebean}"
 	 verbose="true"/>
