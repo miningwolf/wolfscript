@@ -18,8 +18,12 @@
 package io.wolfscript.plugin.spigot.command;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.JSFunction;
+import org.dynjs.runtime.DynArray;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -27,18 +31,22 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 
+import io.wolfscript.plugin.WSPluginCore;
+
 @SuppressWarnings("unchecked")
 public class WSCommandTabExecutor implements CommandExecutor, TabCompleter {
     private JSFunction executeMethod;
     private JSFunction tabCompleteMethod;
     private ExecutionContext executionContext;
     private String name;
-
-     public WSCommandTabExecutor(String name, JSFunction executeMethod, JSFunction tabCompleteMethod, ExecutionContext executionContext) {
+    private WSPluginCore core;
+ 
+     public WSCommandTabExecutor(WSPluginCore core, String name, JSFunction executeMethod, JSFunction tabCompleteMethod, ExecutionContext executionContext) {
         this.name = name;
         this.executeMethod = executeMethod;
         this.tabCompleteMethod = tabCompleteMethod;
         this.executionContext = executionContext;
+        this.core = core;
     }
 
    /**
@@ -63,7 +71,7 @@ public class WSCommandTabExecutor implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
         try {
-         return (boolean)executionContext.call((JSFunction) executeMethod, sender, command, label, args);
+         return (boolean)executionContext.call((JSFunction) executeMethod, core, sender, command, label, args);
         } catch (Throwable t) {
                 t.printStackTrace();
                 return false;
@@ -74,16 +82,40 @@ public class WSCommandTabExecutor implements CommandExecutor, TabCompleter {
      * Requests a list of possible completions for a command argument.
      *
      * @param sender Source of the command
-     * @param command Command which was executed
+     * @param command Command to execute
      * @param alias The alias used
      * @param args The arguments passed to the command, including final
      *     partial argument to be completed and command label
-     * @return A List of possible completions for the final argument, or null
-     *     to default to the command executor
+     * @return A List of possible completions for the final argument
      */
      @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     {
-        return (List<String>)executionContext.call((JSFunction) tabCompleteMethod, sender, command, alias, args);
+           try {
+             return toJavaList((DynArray)executionContext.call((JSFunction) tabCompleteMethod, core, sender, command, alias, args));
+             } catch (Throwable t) {
+            t.printStackTrace();
+              return Collections.<String>emptyList();
+             }
+    }
+
+    private List<String> toJavaList(DynArray dynArray)
+    {
+         int length = (int) dynArray.length();
+        List<String> converted = new ArrayList<String>();
+        for (int i = 0; i < length; i++) {
+            converted.add((String)dynArray.get(i));
+        }
+        return converted;
+    }
+
+    private String[] toJavaArray(DynArray dynArray)
+    {
+       int length = (int) dynArray.length();
+       String[] converted = new String[length];
+        for (int i = 0; i < length; i++) {
+            converted[i] = (String)dynArray.get(i);
+        }
+        return converted;
     }
 }

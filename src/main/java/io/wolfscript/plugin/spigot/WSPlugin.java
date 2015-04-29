@@ -78,8 +78,8 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
         this.logger.info("Plugin for WolfScript loading: " + mainFile.getAbsolutePath());
      
         try {
-           this.commands = new WSCommands(this);
            this.core = new WSPluginCore(mainFile.getAbsolutePath(), logger, this);
+           this.commands = new WSCommands(this, this.core);
         } catch (Throwable t) {
 			t.printStackTrace();
 			logger.severe(t.getMessage());

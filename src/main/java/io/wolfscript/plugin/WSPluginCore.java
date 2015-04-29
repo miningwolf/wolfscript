@@ -112,5 +112,4 @@ public class WSPluginCore {
    	public final Logger getLogger() {
         return logger;
     }
-
 }

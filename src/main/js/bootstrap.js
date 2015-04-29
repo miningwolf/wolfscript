@@ -104,8 +104,8 @@ API.prototype.registerCommand = function(metaContext) {
   var max = (metaContext.max === undefined) ? -1 : metaContext.max;
   var version = (metaContext.version === undefined) ? 1 : metaContext.version;
 
-  var tabComplete = (metaContext.tabComplete === undefined) ? function(command, alias, args){ return ["js"]; } : metaContext.tabComplete;
-  var execute = (metaContext.execute === undefined) ? function(command, label, args) {} : metaContext.execute;
+  var tabComplete = (metaContext.tabComplete === undefined) ? function(sender, command, alias, args){ return ["js"]; } : metaContext.tabComplete;
+  var execute = (metaContext.execute === undefined) ? function(sender, command, label, args) {} : metaContext.execute;
   var that = this;
 
   this.registerWSCommand(
@@ -113,8 +113,8 @@ API.prototype.registerCommand = function(metaContext) {
     toolTip,
     description,
     aliases,
-    function(command, label, args){return execute.call(that, this, command, label, args);},
-    function(command, alias, args){return tabComplete.call(that, this, command, alias, args);}
+    execute,
+    tabComplete
     );
 }
 

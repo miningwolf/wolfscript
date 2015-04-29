@@ -40,6 +40,7 @@ import org.dynjs.runtime.JSFunction;
 import io.wolfscript.plugin.spigot.WSPlugin;
 import io.wolfscript.plugin.spigot.command.WSCommandTabExecutor;
 import io.wolfscript.plugin.ReflectionHelper;
+import io.wolfscript.plugin.WSPluginCore;
 
 public class WSCommands {
 
@@ -51,15 +52,18 @@ public class WSCommands {
     /**
      * List of handlers to register
      */
-    ArrayList<WSCommandTabExecutor> commandTabExecutors = new ArrayList<WSCommandTabExecutor>();
+    private ArrayList<WSCommandTabExecutor> commandTabExecutors = new ArrayList<WSCommandTabExecutor>();
     
     /**
      * Plugin owner 
      */
-    WSPlugin plugin;
+    private WSPlugin plugin;
+    private WSPluginCore core;
+    
 
-    public WSCommands(WSPlugin plugin) {
+    public WSCommands(WSPlugin plugin, WSPluginCore core) {
         this.plugin = plugin;
+        this.core = core;
     }
 
     /**
@@ -126,7 +130,7 @@ public class WSCommands {
 
         addToPluginDescription(name, commandmap);
     
-        WSCommandTabExecutor commandTabExecutor = new WSCommandTabExecutor(name, executeMethod, tabComplete, executionContext);
+        WSCommandTabExecutor commandTabExecutor = new WSCommandTabExecutor(core, name, executeMethod, tabComplete, executionContext);
         commandTabExecutors.add(commandTabExecutor);
     }
 
