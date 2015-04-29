@@ -21,11 +21,15 @@ import java.util.List;
 import java.lang.Class;
 import java.util.logging.Logger;
 import java.io.IOException;
+import java.util.Arrays;
 
 import io.wolfscript.engine.WSEngineNodyn;
+import io.wolfscript.plugin.IRegisterHandler;
 
 import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.JSObject;
+import org.dynjs.runtime.ExecutionContext;
+
 
 /**
  * A WolfScript plugin (java side, common code for all WolfScript plugins)
@@ -36,8 +40,10 @@ public class WSPluginCore {
 	private JSObject jsplugin;
 	private static WSEngineNodyn engine = null;
 	private Logger logger;
-
-	public WSPluginCore(String mainFile, Logger logger) throws Exception {
+	private IRegisterHandler registerHandler;
+	private ExecutionContext executionContext;
+	
+	public WSPluginCore(String mainFile, Logger logger, IRegisterHandler registerHandler) throws Exception {
 		super();
 	
 		if  (engine == null) {
@@ -46,13 +52,15 @@ public class WSPluginCore {
 		}
  
 		this.engine = engine;
+		this.executionContext = engine.getDefaultExecutionContext();
 		this.logger = logger;
-	//	this.hookExecutor = Canary.hooks();
+		this.registerHandler = registerHandler;
 
 		this.jsplugin = null;
 	//	String mainFile = desc.getPath() + "/" + desc.getCanaryInf().getString("main-class");
 	
 		try {
+
 			JSFunction bootPlugin = (JSFunction) engine.getGlobal( "__boot_plugin");
 			Object obj = engine.call(bootPlugin, this, mainFile);
 			
@@ -65,6 +73,14 @@ public class WSPluginCore {
 			t.printStackTrace();
 			logger.severe(t.getMessage());
 			throw new IOException("Failed to load plugin", t);
+		}
+	}
+
+	public void onLoad() {
+		try {
+			engine.call((JSFunction) jsplugin.get(null, "onload"), this);
+		} catch (Exception e) {
+			this.getLogger().severe(e.getMessage());
 		}
 	}
 
@@ -85,14 +101,13 @@ public class WSPluginCore {
 	}
 
     // API Helpers
-	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
-    
-	}
-
-    public void DynamicEvent(String eventName, JSFunction execute, String priority) {
-    
-    	
+    public void registerWSCommand(String name, String usage, String desc, String[] aliases, JSFunction executeMethod, JSFunction tabComplete) {
+           registerHandler.registerCommand(name, usage, desc, Arrays.asList(aliases), executeMethod, tabComplete, engine.getDefaultExecutionContext());
     }
+
+    public void registerWSEvent(String eventName, JSFunction execute, String priority) {
+    
+    }    
     
    	public final Logger getLogger() {
         return logger;

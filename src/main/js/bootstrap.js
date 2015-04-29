@@ -91,38 +91,36 @@ var API = function(javaplugin, jsplugin) {
  */
 
 API.prototype.registerCommand = function(metaContext) {
-  var aliases = (metaContext.aliases === undefined) ? [ "js" , "jsp" ] : metaContext.aliases;
-  var permissions = (metaContext.permissions === undefined) ? [ "" ] : metaContext.permissions;
-  var description = (metaContext.description === undefined) ? "" : metaContext.description;
+  var name = (metaContext.name === undefined) ? "js" : metaContext.name;
   var toolTip = (metaContext.toolTip === undefined) ? "/js command" : metaContext.toolTip;
+  var description = (metaContext.description === undefined) ? "" : metaContext.description;
+  var aliases = (metaContext.aliases === undefined) ? [ "js" , "jsp" ] : metaContext.aliases;
+
+  var permissions = (metaContext.permissions === undefined) ? [ "" ] : metaContext.permissions;
   var parent = (metaContext.parent === undefined) ? "" : metaContext.parent;
   var helpLookup = (metaContext.helpLookup === undefined) ? "" : metaContext.helpLookup;
   var searchTerms = (metaContext.searchTerms === undefined) ? [ "" ] : metaContext.searchTerms;
   var min = (metaContext.min === undefined) ? 1 : metaContext.min;
   var max = (metaContext.max === undefined) ? -1 : metaContext.max;
-  var tabComplete = (metaContext.tabComplete === undefined) ? function(sender, args){ return ["js"]; } : metaContext.tabComplete;
   var version = (metaContext.version === undefined) ? 1 : metaContext.version;
-  var execute = (metaContext.execute === undefined) ? function(sender, args) {} : metaContext.execute;
-  
-  this.DynamicCommand(
+
+  var tabComplete = (metaContext.tabComplete === undefined) ? function(command, alias, args){ return ["js"]; } : metaContext.tabComplete;
+  var execute = (metaContext.execute === undefined) ? function(command, label, args) {} : metaContext.execute;
+  var that = this;
+
+  this.registerWSCommand(
+    name,
+    toolTip,
+    description,
     aliases,
-    permissions,  
-    description, 
-    toolTip, 
-    parent, 
-    helpLookup, 
-    searchTerms, 
-    min,
-    max, 
-    "", 
-    version, 
-    execute,
-    function(owner, sender, args){tabComplete.call(owner,sender,args);}
+    function(command, label, args){return execute.call(that, this, command, label, args);},
+    function(command, alias, args){return tabComplete.call(that, this, command, alias, args);}
     );
 }
 
+
 API.prototype.onEvent = function(name, handler, priority) {
-  this.DynamicEvent(
+  this.registerWSEvent(
     name, 
     handler, 
     priority);

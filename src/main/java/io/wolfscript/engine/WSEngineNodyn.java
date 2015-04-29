@@ -24,6 +24,7 @@ import io.nodyn.NoOpExitHandler;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
 import org.dynjs.runtime.java.JavaPackage;
+import org.dynjs.runtime.ExecutionContext;
 
 import java.io.File;
 import java.lang.Thread;
@@ -98,6 +99,12 @@ public class WSEngineNodyn  {
    public Object getGlobal(String name)
     {
     	return 	globalObject.get(null, name);
+    }
+
+
+   public ExecutionContext getDefaultExecutionContext()
+    {
+    	return runtime.getDefaultExecutionContext();
     }
     
     public Object call(JSFunction jsfunction, Object self, Object... args)

@@ -21,14 +21,17 @@ import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.List;
 
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.JSFunction;
+
 import org.bukkit.Server;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.PluginBase;
 import org.bukkit.plugin.PluginDescriptionFile;
-
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -38,6 +41,8 @@ import io.wolfscript.plugin.WSPluginCore;
 import com.avaje.ebean.EbeanServer;
 
 import io.wolfscript.plugin.spigot.WSPluginLoader;
+import io.wolfscript.plugin.spigot.command.WSCommands;
+import io.wolfscript.plugin.IRegisterHandler;
 
 /**
  * Represents the Java container of a WolfScript plugin for Spigot/CraftBukkit/Bukkit
@@ -46,7 +51,7 @@ import io.wolfscript.plugin.spigot.WSPluginLoader;
  * @author MiningWolf
  *
  */
-public class WSPlugin extends PluginBase {
+public class WSPlugin extends PluginBase implements IRegisterHandler {
     private boolean isEnabled = false;
     private PluginLoader loader = null;
     private Server server = null;
@@ -57,6 +62,7 @@ public class WSPlugin extends PluginBase {
     private WSPluginLogger logger = null;
     
     private WSPluginCore core = null;
+    private WSCommands commands = null;
     
     public WSPlugin() {
     }
@@ -72,7 +78,8 @@ public class WSPlugin extends PluginBase {
         this.logger.info("Plugin for WolfScript loading: " + mainFile.getAbsolutePath());
      
         try {
-            this.core = new WSPluginCore(mainFile.getAbsolutePath(), logger);
+           this.commands = new WSCommands(this);
+           this.core = new WSPluginCore(mainFile.getAbsolutePath(), logger, this);
         } catch (Throwable t) {
 			t.printStackTrace();
 			logger.severe(t.getMessage());
@@ -163,6 +170,7 @@ public class WSPlugin extends PluginBase {
      @Override
     public void onLoad()
     {
+          core.onLoad();
     }
 
     /**
@@ -171,6 +179,7 @@ public class WSPlugin extends PluginBase {
      @Override
     public void onEnable()
     {
+        commands.onEnable();
         core.onEnable();
     }
     
@@ -316,58 +325,42 @@ public class WSPlugin extends PluginBase {
      @Override
     public void reloadConfig()
     {
-        
     }
 
-  /**
-     * Gets the {@link EbeanServer} tied to this plugin. This will only be
-     * available if enabled in the {@link
-     * PluginDescriptionFile#isDatabaseEnabled()}
-     * <p>
-     * <i>For more information on the use of <a href="http://www.avaje.org/">
-     * Avaje Ebeans ORM</a>, see <a
-     * href="http://www.avaje.org/ebean/documentation.html">Avaje Ebeans
-     * Documentation</a></i>
-     * <p>
-     * <i>For an example using Ebeans ORM, see <a
-     * href="https://github.com/Bukkit/HomeBukkit">Bukkit's Homebukkit Plugin
-     * </a></i>
-     *
-     * @return ebean server instance or null if not enabled
+    /**
+     * Default eBeans Database is not used in WolfScript plugins
      */
-      @Override
+   @Override
    public EbeanServer getDatabase()
     {
         return null;
     }
  
-       /**
-     * Requests a list of possible completions for a command argument.
-     *
-     * @param sender Source of the command
-     * @param command Command which was executed
-     * @param alias The alias used
-     * @param args The arguments passed to the command, including final
-     *     partial argument to be completed and command label
-     * @return A List of possible completions for the final argument, or null
-     *     to default to the command executor
+    /**
+     * Default onTabComplete method is overriden by WSCommands class
      */
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
+        @Override
+     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     {
         return null;
     }
     
-      /**
-     * Executes the given command, returning its success
-     *
-     * @param sender Source of the command
-     * @param command Command which was executed
-     * @param label Alias of the command which was used
-     * @param args Passed command arguments
-     * @return true if a valid command, otherwise false
+    /**
+     * Default onCommand method is overriden by WSCommands class
      */
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
+         @Override
+     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
+        this.getLogger().info(label + "command");
         return false;
+    }
+  
+    // API Helpers
+    public void registerCommand(String name, String usage, String desc, List<?> aliases, JSFunction executeMethod, JSFunction tabComplete, ExecutionContext executionContext) {
+        commands.registerCommand(name, usage, desc, aliases, executeMethod, tabComplete, executionContext);
+    }
+
+    public void registerEvent(String eventName, JSFunction execute, String priority, ExecutionContext executionContext) {
+
     }
 }

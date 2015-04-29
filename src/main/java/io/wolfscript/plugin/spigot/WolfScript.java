@@ -129,18 +129,20 @@ public class WolfScript extends JavaPlugin {
             if (jsdir.exists())
             {
                 for (File pdir : jsdir.listFiles()) {
-                 for (File file : pdir.listFiles()) {
-                    for (Pattern filter : this.filters) {
-                        Matcher match = filter.matcher(file.getName());
-                        if (match.find()) {
-                            try {
-                                this.pm.loadPlugin(file);
-                            }catch (Throwable t) {
-                                 t.printStackTrace();
-                            }
-                        }  //match
-                    } //filters
-                 } //files
+                  if (pdir.isDirectory()){
+                     for (File file : pdir.listFiles()) {
+                        for (Pattern filter : this.filters) {
+                            Matcher match = filter.matcher(file.getName());
+                            if (match.find()) {
+                                try {
+                                    this.pm.loadPlugin(file);
+                                }catch (Throwable t) {
+                                     t.printStackTrace();
+                                }
+                            }  //match
+                        } //filters
+                     } //files
+                    } // if
                 } //pdir
             }  
     }
