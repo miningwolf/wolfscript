@@ -81,6 +81,7 @@ public class WSCommands {
                 throw new IllegalArgumentException("Command " + name + " not found in plugin " + plugin.getDescription().getName());
             command.setExecutor(commandTabExecutor);
             command.setTabCompleter(commandTabExecutor);
+            plugin.getLogger().info("Command " + name + " registered");
        }
     }
 

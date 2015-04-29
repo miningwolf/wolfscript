@@ -100,13 +100,14 @@ public class WSPluginCore {
 		}
 	}
 
-    // API Helpers
+    // API Helpers to Call IRegisterHandler
+
     public void registerWSCommand(String name, String usage, String desc, String[] aliases, JSFunction executeMethod, JSFunction tabComplete) {
            registerHandler.registerCommand(name, usage, desc, Arrays.asList(aliases), executeMethod, tabComplete, engine.getDefaultExecutionContext());
     }
 
-    public void registerWSEvent(String eventName, JSFunction execute, String priority) {
-    
+    public void registerWSEvent(String eventName, JSFunction executeMethod, String priority) {
+           registerHandler.registerEvent(eventName, executeMethod, priority, engine.getDefaultExecutionContext());
     }    
     
    	public final Logger getLogger() {

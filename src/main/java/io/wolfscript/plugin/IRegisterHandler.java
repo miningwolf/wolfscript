@@ -24,4 +24,5 @@ import org.dynjs.runtime.JSFunction;
 public interface IRegisterHandler
 {
     public void registerCommand(String name, String usage, String desc, List<?> aliases, JSFunction executeMethod, JSFunction tabComplete, ExecutionContext executionContext);
+    public void registerEvent(String eventName, JSFunction executeMethod, String priority, ExecutionContext executionContext);
 }

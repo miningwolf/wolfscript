@@ -57,6 +57,9 @@ import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
+import io.wolfscript.plugin.spigot.event.WSEvents;
+import io.wolfscript.plugin.spigot.event.WSEventExecutor;
+
 /**
  * Spigot / CraftBukkit / Bukkit Plugin Loader for WolfScript
  */
@@ -166,7 +169,7 @@ public class WSPluginLoader implements PluginLoader {
          return fileFilters.clone();
     }
 
-    /**
+      /**
      * Creates and returns registered listeners for the event classes used in
      * this listener
      *
@@ -174,12 +177,21 @@ public class WSPluginLoader implements PluginLoader {
      * @param plugin The plugin to use when creating registered listeners
      * @return The registered listeners.
      */
-    public Map<Class<? extends Event>, Set<RegisteredListener>> createRegisteredListeners(Listener listener, Plugin plugin)
-    {
-        Map<Class<? extends Event>, Set<RegisteredListener>> ret = new HashMap<Class<? extends Event>, Set<RegisteredListener>>();
-        server.getLogger().info("[WolfScript] Unexpected createRegisteredListeners");
-  
-        return ret;
+    @Override
+    public Map<Class<? extends Event>, Set<RegisteredListener>> createRegisteredListeners(
+            Listener listener, Plugin plugin) {
+    
+        if(!listener.getClass().equals(WSEvents.class)) {
+            throw new IllegalArgumentException("Listener to register is not WolfScript WSEvents class");
+        }
+
+        WSEvents wsEvents = (WSEvents)listener;
+
+        if(!wsEvents.getPlugin().equals(plugin)) {
+            throw new IllegalArgumentException("WSEvents listener is not associated with the given plugin");
+        }
+
+         return wsEvents.createRegisteredListeners();
     }
 
     /**
@@ -206,7 +218,6 @@ public class WSPluginLoader implements PluginLoader {
             } catch (Throwable ex) {
                 server.getLogger().log(Level.SEVERE, "Error occurred while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
             }
-
              server.getPluginManager().callEvent(new PluginEnableEvent(plugin));
         }
     }

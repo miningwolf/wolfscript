@@ -42,6 +42,7 @@ import com.avaje.ebean.EbeanServer;
 
 import io.wolfscript.plugin.spigot.WSPluginLoader;
 import io.wolfscript.plugin.spigot.command.WSCommands;
+import io.wolfscript.plugin.spigot.event.WSEvents;
 import io.wolfscript.plugin.IRegisterHandler;
 
 /**
@@ -63,7 +64,8 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
     
     private WSPluginCore core = null;
     private WSCommands commands = null;
-    
+    private WSEvents events = null;
+   
     public WSPlugin() {
     }
 
@@ -80,6 +82,7 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
         try {
            this.core = new WSPluginCore(mainFile.getAbsolutePath(), logger, this);
            this.commands = new WSCommands(this, this.core);
+           this.events = new WSEvents(this, this.core);
         } catch (Throwable t) {
 			t.printStackTrace();
 			logger.severe(t.getMessage());
@@ -179,8 +182,9 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
      @Override
     public void onEnable()
     {
-        commands.onEnable();
         core.onEnable();
+        commands.onEnable();
+        server.getPluginManager().registerEvents(events, this);
     }
     
     /**
@@ -355,12 +359,13 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
         return false;
     }
   
-    // API Helpers
+    // IRegisterHandler (for API Helpers)
+    
     public void registerCommand(String name, String usage, String desc, List<?> aliases, JSFunction executeMethod, JSFunction tabComplete, ExecutionContext executionContext) {
         commands.registerCommand(name, usage, desc, aliases, executeMethod, tabComplete, executionContext);
     }
 
     public void registerEvent(String eventName, JSFunction execute, String priority, ExecutionContext executionContext) {
-
+        events.registerEvent(eventName, execute, priority, executionContext);  
     }
 }
