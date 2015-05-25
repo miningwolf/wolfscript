@@ -71,7 +71,7 @@ public class WSCommandTabExecutor implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
         try {
-         return (boolean)executionContext.call((JSFunction) executeMethod, core, sender, command, label, args);
+         return (boolean)executionContext.call((JSFunction) executeMethod, core, sender, label, args);
         } catch (Throwable t) {
                 t.printStackTrace();
                 return false;
@@ -92,7 +92,7 @@ public class WSCommandTabExecutor implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     {
            try {
-             return toJavaList((DynArray)executionContext.call((JSFunction) tabCompleteMethod, core, sender, command, alias, args));
+             return toJavaList((DynArray)executionContext.call((JSFunction) tabCompleteMethod, core, sender, alias, args));
              } catch (Throwable t) {
             t.printStackTrace();
               return Collections.<String>emptyList();

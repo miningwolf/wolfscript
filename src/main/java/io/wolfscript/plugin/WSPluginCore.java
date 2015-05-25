@@ -19,7 +19,7 @@ package io.wolfscript.plugin;
 
 import java.util.List;
 import java.lang.Class;
-import java.util.logging.Logger;
+import io.wolfscript.plugin.ILogger;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -39,11 +39,11 @@ import org.dynjs.runtime.ExecutionContext;
 public class WSPluginCore {
 	private JSObject jsplugin;
 	private static WSEngineNodyn engine = null;
-	private Logger logger;
+	private ILogger logger;
 	private IRegisterHandler registerHandler;
 	private ExecutionContext executionContext;
 	
-	public WSPluginCore(String mainFile, Logger logger, IRegisterHandler registerHandler) throws Exception {
+	public WSPluginCore(String mainFile, ILogger logger, IRegisterHandler registerHandler) throws Exception {
 		super();
 	
 		if  (engine == null) {
@@ -57,7 +57,6 @@ public class WSPluginCore {
 		this.registerHandler = registerHandler;
 
 		this.jsplugin = null;
-	//	String mainFile = desc.getPath() + "/" + desc.getCanaryInf().getString("main-class");
 	
 		try {
 
@@ -110,7 +109,7 @@ public class WSPluginCore {
            registerHandler.registerEvent(eventName, executeMethod, priority, engine.getDefaultExecutionContext());
     }    
     
-   	public final Logger getLogger() {
+   	public final ILogger getLogger() {
         return logger;
     }
 }

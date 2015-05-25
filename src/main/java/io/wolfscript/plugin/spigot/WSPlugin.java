@@ -35,7 +35,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import io.wolfscript.plugin.WSPluginLogger;
+import io.wolfscript.plugin.spigot.WSLogger;
 import io.wolfscript.plugin.WSPluginCore;
 
 import com.avaje.ebean.EbeanServer;
@@ -60,7 +60,7 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
     private PluginDescriptionFile description = null;
     private File dataFolder = null;
     private boolean naggable = true;
-    private WSPluginLogger logger = null;
+    private WSLogger logger = null;
     
     private WSPluginCore core = null;
     private WSCommands commands = null;
@@ -75,7 +75,7 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
         this.file = file;
         this.description = description;
         this.dataFolder = dataFolder;
-        this.logger = new WSPluginLogger(description.getName(), server.getLogger());
+        this.logger = new WSLogger(description.getName(), server.getLogger());
         File mainFile = new File(file.getParentFile(), description.getMain());
         this.logger.info("Plugin for WolfScript loading: " + mainFile.getAbsolutePath());
      
@@ -245,7 +245,7 @@ public class WSPlugin extends PluginBase implements IRegisterHandler {
      @Override
     public Logger getLogger()
     {
-         return logger;
+         return logger.javaLogger();
     }
     
      @Override

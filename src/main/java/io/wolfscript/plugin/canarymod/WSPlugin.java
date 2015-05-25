@@ -27,15 +27,11 @@ import net.canarymod.hook.Hook;
 import net.canarymod.hook.HookExecutionException;
 import net.canarymod.hook.Dispatcher;
 import net.canarymod.plugin.Priority;
-import io.nodyn.runtime.Program;
-import io.nodyn.Callback;
-import io.nodyn.CallbackResult;
 
-import org.dynjs.runtime.JSObject;
-import io.nodyn.Nodyn;
-import org.dynjs.runtime.*;
-import org.dynjs.runtime.builtins.DynJSBuiltin;
-import org.dynjs.runtime.JSFunction;
+import io.wolfscript.plugin.canarymod.WSLogger;
+import io.wolfscript.plugin.WSPluginCore;
+import io.wolfscript.plugin.canarymod.commandsys.DynamicCommand;
+import io.wolfscript.plugin.IRegisterHandler;
 
 import net.canarymod.chat.MessageReceiver;
 import net.canarymod.commandsys.TabCompleteDispatch;
@@ -44,83 +40,94 @@ import net.canarymod.commandsys.CommandOwner;
 import net.canarymod.commandsys.CommandManager;
 import net.canarymod.commandsys.CommandDependencyException;
 
-import java.util.List;
-import java.lang.Class;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.JSFunction;
 
-import io.wolfscript.plugin.canarymod.commandsys.DynamicCommand;
+import java.util.List;
 
 /**
- * A WolfScript plugin (java side, common code for all WolfScript plugins)
+ * Represents the Java container of a WolfScript plugin for CanaryMod
+ * <p>
+ * Loaded by new WolfScript plugin laoder
+ * @author MiningWolf
  *
- * @author miningwolf
  */
-public class WSPlugin extends Plugin {
-	private JSObject jsplugin;
-	private Nodyn nodyn;
-	private DynJS runtime;
-	private JSObject globalObject;
-    private HookExecutor hookExecutor;
+public class WSPlugin extends Plugin implements IRegisterHandler {
+	private WSLogger logger = null;
+    private WSPluginCore core = null;
+   private HookExecutor hookExecutor;
  
-	public WSPlugin(Nodyn nodyn, PluginDescriptor desc) throws Exception {
+	public WSPlugin(PluginDescriptor desc) throws Exception {
 		super();
+		
+	   this.hookExecutor = Canary.hooks();
 
-		this.nodyn = nodyn;
-		this.globalObject = (JSObject) nodyn.getGlobalContext();
-		this.hookExecutor = Canary.hooks();
-
-		this.jsplugin = null;
 		String mainFile = desc.getPath() + "/" + desc.getCanaryInf().getString("main-class");
-		try {
-			DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) globalObject.get(null, "dynjs");
-			this.runtime = dynjsBuiltin.getRuntime();
-			JSFunction bootPlugin = (JSFunction) globalObject.get(null, "__boot_plugin");
-
-			Object obj = this.runtime.getDefaultExecutionContext().call(bootPlugin, this, mainFile);
-			if (obj instanceof JSObject) {
-				this.jsplugin = (JSObject) obj;
-			} else {
-				Canary.log.error("Wolfscript plugin does not seem to be an node module with exports.enable function() ");
-			}
-		} catch (Throwable t) {
+		this.logger = new WSLogger(desc.getName(), (org.apache.logging.log4j.Logger)this.getLogman());
+     
+	  try {
+           this.core = new WSPluginCore(mainFile, logger, this);
+        } catch (Throwable t) {
 			t.printStackTrace();
-			Canary.log.error(t.getMessage());
-			throw new PluginLoadFailedException("Failed to load plugin", t);
+			this.logger.severe(t.getMessage());
 		}
 	}
 
 	@Override
 	public void disable() {
-		try {
-			runtime.getDefaultExecutionContext().call((JSFunction) jsplugin.get(null, "disable"), this);
-		} catch (Exception e) {
-			this.getLogman().error(e.getMessage());
-		}
+		 core.onDisable();
 	}
 
 	@Override
 	public boolean enable() {
 		try {
-			runtime.getDefaultExecutionContext().call((JSFunction) jsplugin.get(null, "enable"), this);
-			return true;
+			   core.onEnable();
+        		return true;
 		} catch (Exception e) {
 			throw e;
 		}
 	}
-
-    // API Helpers
-	public void DynamicCommand(String[] aliases, String[] permissions, String description, String toolTip, String parent, String helpLookup, String[] searchTerms, int min, int max, String tabCompleteMethod, int version, JSFunction execute, JSFunction tabComplete) {
-		DynamicCommandAnnotation meta = new DynamicCommandAnnotation(aliases, permissions, description, toolTip, parent, helpLookup, searchTerms, min, max, tabCompleteMethod, version);
-		DynamicCommand cc = new DynamicCommand(execute, meta, this, tabComplete, runtime.getDefaultExecutionContext());
+	
+	  // IRegisterHandler (for API Helpers)
+	  
+      /**
+    * Register a command 
+    * @param name name to use
+    * @param usage metadata
+    * @param desc metadata
+    * @param aliases metadata
+    * @param JSFunction executeMethod to set as handler
+    * @param JSFunction tabCompleteMethod
+    * @param ExecutionContext executionContext
+    */ 
+    public void registerCommand(String name, String usage, String desc, List<?> aliases, JSFunction executeMethod, JSFunction tabComplete, ExecutionContext executionContext) {
+     
+	 DynamicCommandAnnotation meta = new DynamicCommandAnnotation(
+		aliases.toArray(new String[0]),
+		new String[0] /* permissionsArray */,
+		desc /* description */,
+		usage /* tooltip */,
+		"" /* parent */,
+		usage /* helpLookup */,
+		new String[0] /* searchTerms */, 
+		1 /* min */,
+		-1 /* max */, 
+		"" /* tabCompleteMethod */, 
+		1 /* version */
+		);
+	
+	   DynamicCommand cc = new DynamicCommand(this.core, executeMethod, meta, this, tabComplete, executionContext);
 	
 		try {
 			Canary.commands().registerCommand(cc, this, false);
 		} catch (CommandDependencyException e) {
-			this.getLogman().error(e.getMessage());
+			this.logger.error(e.getMessage());
 		};
+  
     }
 
-    public void DynamicEvent(String eventName, JSFunction execute, String priority) {
-		Class t;
+    public void registerEvent(String eventName, JSFunction executeMethod, String priority, ExecutionContext executionContext) {
+ 		Class t;
 
 		try
 		{
@@ -137,7 +144,7 @@ public class WSPlugin extends Plugin {
 				@Override
 				public void execute(PluginListener listener, Hook hook) {
 					try {
-						runtime.getDefaultExecutionContext().call(execute, listener, hook);
+						executionContext.call(executeMethod, core, hook);
 					} catch (Exception ex) {
 						throw new HookExecutionException(ex.getMessage(), ex);
 					}
@@ -146,36 +153,30 @@ public class WSPlugin extends Plugin {
 			Priority.valueOf(priority)
 			);
     }
+	
+	 private Class<? extends Hook> getClass(String eventName) throws Exception {
+           String[] elements = { "",
+           "net.canarymod.hook."      };
 
-    private Class getClass(String eventName) throws Exception {
-	       String[] elements = { "",
-	       "net.canarymod.hook.",
-	      "net.canarymod.hook.command.",
-	      "net.canarymod.hook.entity.",
-	      "net.canarymod.hook.player.",
-	      "net.canarymod.hook.system.",
-	      "net.canarymod.hook.world." 
-	    };
+        for (String s: elements) {           
+            System.out.println(s); 
+            try {
+                Class t =  Class.forName(s + eventName);
+                return t;
+            } catch (Exception ex) { 
+                
+            };
+			if (eventName.endsWith("Event")) {
+			
+	            try {
+			        Class t =  Class.forName(s + eventName.substring(0, eventName.length() - 5) + "Hook");
+	                return t;
+	            } catch (Exception ex) { 
+	                
+	            };
+			}
 
-	    for (String s: elements) {           
-		    System.out.println(s); 
-		    try {
-		    	Class t =  Class.forName(s + eventName);
-		    	return t;
-	   		} catch (Exception ex) { 
-	   		 	
-	   		};
-	   		try {
-		    	Class t =  Class.forName(s + eventName + "Hook");
-		    	return t;
-	   		} catch (Exception ex) { 
-	   		 	
-	   		};
-
-
-	 		
-		}
-		throw new Exception("Hook not found " + eventName); 
-	}
-
+        }
+        throw new Exception("Event/Hook not found " + eventName); 
+    }
 }

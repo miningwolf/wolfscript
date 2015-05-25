@@ -32,7 +32,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.lang.reflect.Method;
 import java.io.IOException;
-import java.util.logging.Logger;
+import io.wolfscript.plugin.ILogger;
 
 /* 
  * Nodyn Loader for WolfScript plugins
@@ -43,10 +43,10 @@ public class WSEngineNodyn  {
 	
 	protected Nodyn nodyn;
 	protected JSObject globalObject;
-	protected Logger logger;
+	protected ILogger logger;
 	protected DynJS runtime;
 
-	public WSEngineNodyn(Logger defaultLogger)
+	public WSEngineNodyn(ILogger defaultLogger)
 	{
 		logger = defaultLogger;
 	}
@@ -112,7 +112,7 @@ public class WSEngineNodyn  {
     	return this.runtime.getDefaultExecutionContext().call(jsfunction, self, args);
     }
     
-    public final Logger getLogger() {
+    public final ILogger getLogger() {
         return logger;
     }
 }

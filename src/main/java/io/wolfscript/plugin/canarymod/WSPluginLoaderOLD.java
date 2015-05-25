@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+
 
 package io.wolfscript.plugin.canarymod;
 
@@ -36,11 +36,7 @@ import java.io.File;
 import java.lang.Thread;
 import java.lang.ClassLoader;
 
-/* 
- * Lifecycle manager for a WolfScript plugin that runs under CanaryMod
- *
- * @author miningwolf
- */
+
 public final class WSPluginLoader extends PluginLifecycleBase {
 	private CanaryClassLoader loader;
 	private static Nodyn nodyn;
@@ -112,3 +108,4 @@ public final class WSPluginLoader extends PluginLifecycleBase {
 		}
 	}
 }
+ */

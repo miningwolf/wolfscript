@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-package io.wolfscript.plugin;
+package io.wolfscript.plugin.spigot;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
- * The WSPluginLogger class is a modified {@link Logger} that prepends all
+ * The WSLoggerExtender class is a modified {@link Logger} that prepends all
  * logging calls with the name of the plugin doing the logging. The API for
  * WSPluginLogger is exactly the same as {@link Logger}.
  *
  * @see Logger
  */
-public class WSPluginLogger extends Logger {
+public class WSLoggerExtender extends Logger {
     
     private String pluginName;
     
@@ -37,7 +37,7 @@ public class WSPluginLogger extends Logger {
      *
      * @param context A reference to the plugin
      */
-    public WSPluginLogger(String name, Logger parent) {
+    public WSLoggerExtender(String name, Logger parent) {
         super(name, parent.getResourceBundleName());
         pluginName = "[" + name + "] ";
         setParent(parent);
